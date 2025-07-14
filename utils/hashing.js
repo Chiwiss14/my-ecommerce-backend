@@ -12,7 +12,7 @@ exports.doHashValidation = async (value, hashedValue) => {
     return result;
 }
 
-exports.hmacProcess=(value, key)=>{
-    const result=createHmac('sha256', key).update(value).digest('hex');
+exports.hmacHash = (value, key) => { // <--- CHANGED NAME HERE
+    const result = createHmac('sha256', key).update(value).digest('hex');
     return result;
 }

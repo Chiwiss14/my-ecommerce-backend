@@ -37,6 +37,11 @@ const userSchema = new mongoose.Schema({
         select: false, // Don't return verification code by default
     },
 
+    verificationCodeExpiresAt: { // To store the timestamp when the code expires
+        type: Number, // Storing as Unix timestamp (milliseconds)
+        default: null
+    },
+
     forgotPasswordCodeValidation: { 
         type: Number,
         select: false, // Don't return verification code by default

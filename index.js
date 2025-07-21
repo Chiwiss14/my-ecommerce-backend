@@ -8,10 +8,14 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
 const authRouter = require('./routers/authRouter'); // Assuming you have auth routes set up
+const productRoutes = require('./routers/productRouter'); // Import product routes
+const orderRoutes = require('./routers/orderRoutes'); 
+
+
 
 const app = express();
 
-// 2. Middleware setup (order here is generally fine)
+// 2. Middleware setup 
 app.use(express.json()); // For parsing application/json
 app.use(cors());
 app.use(helmet()); // Basic security headers
@@ -34,6 +38,16 @@ app.use('/api/auth', authRouter); // Use your auth routes here
 app.get('/api', (req, res) => {
     res.json({ message: "Hello from server HERE" });
 });
+
+app.use('/api', productRoutes); // Prefix for product routes (e.g., /api/products, /api/admin/product)
+app.use("/api", require("./routers/orderRoutes"));
+
+app.use('/api', orderRoutes); // Use your order routes
+
+;
+
+
+    
 
 
 // 5. Start the Server

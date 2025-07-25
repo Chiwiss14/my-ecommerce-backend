@@ -10,7 +10,7 @@ const authRouter = require("./routers/authRouter"); // Assuming you have auth ro
 const productRoutes = require("./routers/productRouter"); // Import product routes
 const orderRoutes = require("./routers/orderRoutes");
 // const connectDatabase = require('./config/database'); // Ensure this path is correct
-const payment = require("./routers/paymentRoute");
+const paymentRoute = require("./routers/paymentRoute");
 
 const app = express();
 
@@ -43,7 +43,7 @@ app.use("/api", productRoutes); // Prefix for product routes (e.g., /api/product
 app.use("/api", require("./routers/orderRoutes"));
 
 app.use("/api", orderRoutes); // Use your order routes
-app.use("/api", payment); // Use your payment routes
+app.use("/api/payment", paymentRoute); // Use your payment routes
 
 // 5. Start the Server
 const PORT = process.env.PORT || 5000;

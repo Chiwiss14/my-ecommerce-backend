@@ -1,18 +1,18 @@
-// my-ecommerce-backend/models/orderModel.js
 const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
-    // Link to the user who placed the order
     user: {
         type: mongoose.Schema.ObjectId,
-        ref: 'User', // References your User model
+        ref: 'User',
         required: true,
     },
-    // Array of items in the order
     orderItems: [
         {
-            name: {
-                type: String,
+            // We'll keep product ID and quantity, and price.
+            // Name and image can potentially be populated later from the product ID.
+            product: {
+                type: mongoose.Schema.ObjectId,
+                ref: 'Product',
                 required: true,
             },
             quantity: {
@@ -20,74 +20,50 @@ const orderSchema = new mongoose.Schema({
                 required: true,
                 min: 1,
             },
-            price: { // Price at the time of purchase
+            price: { // Price at the time of purchase for a single item
                 type: Number,
                 required: true,
             },
-            image: { // Main image URL for the product for display in order history
-                type: String,
-                required: true,
-            },
-            product: { // Link to the actual product in the Product model
-                type: mongoose.Schema.ObjectId,
-                ref: 'Product',
-                required: true,
-            },
+            // Removed 'name' and 'image' as required here for simplicity.
+            // They can be added back or populated from the 'product' reference later.
         },
     ],
-    // Shipping information for the order
     shippingInfo: {
-        address: {
-            type: String,
-            required: true,
-        },
-        city: {
-            type: String,
-            required: true,
-        },
-        state: { // Or region/province
-            type: String,
-            required: true,
-        },
-        country: {
-            type: String,
-            required: true,
-        },
-        pinCode: { // Zip/Postal code
-            type: String,
-            required: true,
-        },
-        phoneNo: {
-            type: String,
-            required: true,
-        },
+        // Keeping required for essential shipping, but you can make some optional if needed.
+        address: { type: String, required: true },
+        city: { type: String, required: true },
+        state: { type: String, required: true },
+        country: { type: String, required: true },
+        pinCode: { type: String, required: true },
+        phoneNo: { type: String, required: true },
     },
-    // Payment details summary
     paymentInfo: {
-        // This could be the gateway's transaction ID, or a reference to your Transaction model ID
-        // For simplicity, we can store gateway transaction ID directly here or link to our Transaction model
-        // Linking to Transaction model is better for auditing.
-        id: { // This will be the _id from your Transaction model
-            type: mongoose.Schema.ObjectId,
-            ref: 'Transaction', // References your Transaction model
-            // Not required directly if you want to allow cash on delivery, but usually needed for online payments
+        // Making id and method optional for easier testing (e.g., for Cash on Delivery)
+        // You'd add more rigorous validation/requirements for a live payment gateway
+        id: {
+            type: String, // Changed to String for simpler external transaction ID
+            // Removed ref to 'Transaction' for simplicity, assuming direct ID storage
+            required: false, // Now optional
         },
         status: { // Status of the payment (e.g., 'paid', 'unpaid', 'failed')
             type: String,
-            required: true,
-            enum: ['pending', 'paid', 'failed', 'refunded'], // Matches transaction status for consistency
+            required: true, // Keeping status as required is good practice
+            enum: ['pending', 'paid', 'failed', 'refunded'],
             default: 'pending'
         },
         method: { // How the user paid (e.g., 'Card', 'Bank Transfer', 'COD')
             type: String,
-            required: true,
-            enum: ['Card', 'Bank Transfer', 'COD', 'Wallet'], // Add relevant payment methods
+            required: false, // Now optional
+            enum: ['Card', 'Bank Transfer', 'COD', 'Wallet'],
         },
     },
-    // Amounts
-    itemsPrice: { // Sum of prices of all items (Product price * Quantity)
+    itemsPrice: {
         type: Number,
         required: true,
+        default: 0,
+    },
+    taxPrice: { // Added taxPrice from your previous model, ensuring it's optional if not always present
+        type: Number,
         default: 0,
     },
     shippingPrice: {
@@ -95,27 +71,18 @@ const orderSchema = new mongoose.Schema({
         required: true,
         default: 0,
     },
-    taxPrice: {
+    totalPrice: {
         type: Number,
         required: true,
         default: 0,
     },
-    totalPrice: { // Sum of itemsPrice + shippingPrice + taxPrice
-        type: Number,
-        required: true,
-        default: 0,
-    },
-    // Order Status
     orderStatus: {
         type: String,
         required: true,
         enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
         default: 'pending',
     },
-    // Optional: Date when the order was delivered
-    deliveredAt: Date,
-
-    // Auto-generated timestamps for creation and last update
+    deliveredAt: Date, // Optional date for delivery
 }, {
     timestamps: true, // Adds createdAt and updatedAt automatically
 });

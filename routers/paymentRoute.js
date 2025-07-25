@@ -9,7 +9,7 @@ const router = express.Router();
 
 // Route to initialize a Paystack payment
 // Requires authentication as payment is tied to a user
-router.post('/payment/checkout', identifier, initializePayment);
+router.post('/checkout', identifier, initializePayment);
 router.get('/verify-paystack', verifyPayment); 
 
 

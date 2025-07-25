@@ -68,7 +68,86 @@ exports.initializePayment = async (req, res, next) => {
     }
 };
 
-// // We will add the verifyPayment function in the next step
-// exports.verifyPayment = async (req, res, next) => {
-//     // ... logic to verify transaction ...
-// };
+exports.verifyPayment = async (req, res, next) => {
+    try {
+        const { reference } = req.query; // Paystack sends the reference as a query parameter
+
+        if (!reference) {
+            return res.status(400).json({
+                success: false,
+                message: "Payment reference is missing."
+            });
+        }
+
+        // Call Paystack's verification API using the Paystack instance
+        const response = await Paystack.transaction.verify(reference);
+
+        if (response.status && response.data.status === 'success') {
+            const paystackData = response.data;
+            const orderId = paystackData.metadata ? paystackData.metadata.order_id : null;
+
+            // Find the order in your database
+            const order = await Order.findById(orderId);
+
+            if (!order) {
+                console.error("Verification Error: Order not found for reference:", reference);
+                return res.status(404).json({ success: false, message: "Order not found for this transaction." });
+            }
+
+            // Important: Check if the amount paid matches the order total to prevent fraud
+            // Paystack amount is in kobo, order.totalPrice is likely in naira
+            const amountPaidInNaira = paystackData.amount / 100;
+
+            if (amountPaidInNaira < order.totalPrice) {
+                 // Handle partial payment or fraud attempt
+                 order.paymentStatus = 'partial_payment'; // Or a relevant status
+                 await order.save();
+                 console.warn(`Payment mismatch for order ${orderId}: Paid ${amountPaidInNaira}, Expected ${order.totalPrice}`);
+                 return res.status(400).json({ success: false, message: "Amount paid does not match order total. Possible partial payment or fraud." });
+            }
+
+            // Update order status in your database
+            order.paymentStatus = 'paid';
+            order.paidAt = new Date(paystackData.paid_at); // Use Paystack's paid_at timestamp
+            order.paymentInfo = {
+                id: paystackData.id,
+                reference: paystackData.reference,
+                status: paystackData.status,
+                channel: paystackData.channel,
+                currency: paystackData.currency,
+                amount: paystackData.amount, // Amount in kobo
+                // Store more details if needed
+            };
+
+            await order.save();
+
+            // Respond to Paystack's redirect (or your frontend)
+            // You might want to redirect the user to a success page on your frontend here
+            // e.g., res.redirect(`https://your-frontend.com/payment-success?reference=${reference}`);
+            res.status(200).json({
+                success: true,
+                message: 'Payment verified and order updated successfully',
+                transaction: paystackData
+            });
+
+        } else {
+            // Payment was not successful or verification failed according to Paystack
+            console.error('Paystack Verification Failed:', response.message);
+            res.status(400).json({
+                success: false,
+                message: response.message || 'Payment verification failed.'
+            });
+        }
+
+    } catch (error) {
+        console.error('Error during payment verification:', error);
+        // If it's an Axios error from Paystack API call, log response data
+        if (error.response && error.response.data) {
+            console.error('Paystack API Error Response (Verification):', error.response.data);
+        }
+        res.status(500).json({
+            success: false,
+            message: error.message || 'Server error during payment verification.'
+        });
+    }
+};

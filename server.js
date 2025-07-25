@@ -16,5 +16,10 @@ app.get('/api/products', (req, res) => {
   ]);
 });
 
+app.get("/api/index", (_, response) => {
+  console.log('Root route accessed!'); // <--- ADD THIS LINE TEMPORARILY
+  response.json({ info: "Express app with Supabase" });
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));

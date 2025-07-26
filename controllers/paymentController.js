@@ -75,6 +75,7 @@ exports.verifyPayment = async (req, res, next) => {
   try {
     const { reference } = req.query; // Paystack sends the reference as a query parameter
     console.log("Verify Payment Endpoint Hit. Reference:", reference); // Log 1
+    console.log("Query received:", req.query); // Add this
 
     if (!reference) {
       return res.status(400).json({
@@ -100,12 +101,10 @@ exports.verifyPayment = async (req, res, next) => {
           "Verification Error: Order not found for reference:",
           reference
         );
-        return res
-          .status(404)
-          .json({
-            success: false,
-            message: "Order not found for this transaction.",
-          });
+        return res.status(404).json({
+          success: false,
+          message: "Order not found for this transaction.",
+        });
       }
 
       // Important: Check if the amount paid matches the order total to prevent fraud
@@ -119,13 +118,11 @@ exports.verifyPayment = async (req, res, next) => {
         console.warn(
           `Payment mismatch for order ${orderId}: Paid ${amountPaidInNaira}, Expected ${order.totalPrice}`
         );
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message:
-              "Amount paid does not match order total. Possible partial payment or fraud.",
-          });
+        return res.status(400).json({
+          success: false,
+          message:
+            "Amount paid does not match order total. Possible partial payment or fraud.",
+        });
       }
 
       // Update order status in your database

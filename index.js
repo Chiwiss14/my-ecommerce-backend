@@ -44,6 +44,8 @@ app.use("/api", require("./routers/orderRoutes"));
 
 app.use("/api", orderRoutes); // Use your order routes
 app.use("/api/payment", paymentRoute); // Use your payment routes
+app.use("/api", contactRoutes); // Use your contact routes
+
 
 // 5. Start the Server
 const PORT = process.env.PORT || 5000;

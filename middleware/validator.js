@@ -96,3 +96,24 @@ exports.productSchemaUpdateValidation = Joi.object({
 }).min(1); // Require at least one field for update
 
 
+exports.validateContactMessage = (req, res, next) => {
+  const contactSchema = Joi.object({
+    name: Joi.string().min(2).max(50).required(),
+    email: Joi.string().email().required(),
+    subject: Joi.string().min(2).max(100).required(),
+    message: Joi.string().min(5).max(500).required()
+  });
+
+  const { error } = contactSchema.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.details[0].message
+    });
+  }
+
+  next();
+};
+
+

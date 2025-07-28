@@ -9,8 +9,8 @@ const mongoose = require("mongoose");
 const authRouter = require("./routers/authRouter"); // Assuming you have auth routes set up
 const productRoutes = require("./routers/productRouter"); // Import product routes
 const orderRoutes = require("./routers/orderRoutes");
-// const connectDatabase = require('./config/database'); // Ensure this path is correct
 const paymentRoute = require("./routers/paymentRoute");
+const contactRoute = require("./routers/contactRoute");
 
 const app = express();
 
@@ -44,7 +44,11 @@ app.use("/api", require("./routers/orderRoutes"));
 
 app.use("/api", orderRoutes); // Use your order routes
 app.use("/api/payment", paymentRoute); // Use your payment routes
-app.use("/api", contactRoutes); // Use your contact routes
+app.use("/api", contactRoute); // Use your contact routes
+
+console.log('Attempting to load contactRoute...'); // ADD THIS LINE
+app.use("/api", contactRoute); // Use your contact routes
+console.log('contactRoute loaded at /api'); // ADD THIS LINE
 
 
 // 5. Start the Server

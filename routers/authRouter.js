@@ -6,7 +6,7 @@ router.post('/signup',authController.signup ) // Import the signup controller fu
 router.post('/signin', authController.signin); // Import the sign controller function
 router.post('/signout',identifier,authController.signout); // Import the forgot password controller function
 router.patch('/send-verification-code',identifier,authController.sendVerificationCode);
- 
+router.patch('/verify-verification-code',identifier,authController.verifyVerificationCode); // Import the verify email controller function
 
 router.patch('/change-password',identifier,authController.changePassword); 
 

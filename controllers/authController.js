@@ -94,11 +94,21 @@ exports.signin = async (req, res) => {
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
     });
-
     res.status(200).json({
       success: true,
       message: "Signin successful",
       token,
+      user: {
+        // <-- Include the user object with relevant details
+        id: existingUser._id,
+        email: existingUser.email,
+        verified: existingUser.verified,
+        role: existingUser.role, // <--- Crucially, send the role here
+        // You can add other non-sensitive user properties if your frontend needs them immediately
+        // e.g., username: existingUser.username,
+      },
+      // Optional: You could also send a suggested redirect path directly
+      // redirectPath: existingUser.role === 'admin' ? '/admin/dashboard' : '/'
     });
   } catch (error) {
     console.error("Error during signin:", error);

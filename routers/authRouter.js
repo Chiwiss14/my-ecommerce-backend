@@ -1,6 +1,8 @@
 const express = require('express');
 const authController = require('../controllers/authController'); // Import your auth controller
 const router = express.Router();
+const identifier = require('../middleware/identifier'); // Import the identifier middleware
+
 
 router.post('/signup',authController.signup ) // Import the signup controller function
 router.post('/signin', authController.signin); // Import the sign controller function

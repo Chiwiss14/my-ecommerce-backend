@@ -1,5 +1,6 @@
 const express = require('express');
 const authController = require('../controllers/authController'); // Import your auth controller
+const { identifier } = require('../middleware/identification');
 const router = express.Router();
 const identifier = require('../middleware/identifier'); // Import the identifier middleware
 

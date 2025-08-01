@@ -4,7 +4,11 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+<<<<<<< HEAD
     "dev": "nodemon index.js --env-file=.env",
+=======
+    "dev": "nodemon index.js --env-file*.env index.js",
+>>>>>>> main
     "start": "node index.js"
   },
   "keywords": [],
@@ -13,6 +17,7 @@
   "description": "Express with supabase DB",
   "dependencies": {
     "@supabase/supabase-js": "^2.50.3",
+    "axios": "^1.10.0",
     "bcryptjs": "^3.0.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -22,6 +27,7 @@
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.16.1",
-    "nodemailer": "^7.0.5"
+    "nodemailer": "^7.0.5",
+    "paystack-api": "^2.0.6"
   }
 }

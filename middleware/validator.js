@@ -73,9 +73,6 @@ exports.productSchemaValidation = Joi.object({
   category: Joi.string().optional(),
   stock: Joi.number().min(0).optional(),
   image: Joi.string().uri().optional(), // Optional field for image URL
-  ratings: Joi.number().min(0).max(5).optional(), // Optional field for ratings
-  comment: Joi.string().optional(), // Optional field for comments  
-  numOfReviews: Joi.number().min(0).optional(), // Optional field for number of reviews
 });
 
 
@@ -87,9 +84,6 @@ exports.productSchemaUpdateValidation = Joi.object({
   category: Joi.string(),
   stock: Joi.number().min(0),
   image: Joi.string().uri().optional(), // Optional field for image URL
-  ratings: Joi.number().min(0).max(5).optional(), // Optional field
-  comment: Joi.string().optional(), // Optional field for comments
-  numOfReviews: Joi.number().min(0).optional(), // Optional field for number of reviews
 
 }).min(1); // Require at least one field for update
 

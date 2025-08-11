@@ -52,7 +52,7 @@ exports.signup = async (req, res) => {
   }
 };
 
-exports.signin = async (req, res) => {
+ exports.signin = async (req, res) => {
   const { email, password } = req.body;
   try {
     const { error } = signinSchema.validate({ email, password });
@@ -63,7 +63,8 @@ exports.signin = async (req, res) => {
         message: error.details[0].message,
       });
     }
-    const existingUser = await User.findOne({ email }).select("+password"); // Include password in the query
+
+    const existingUser = await User.findOne({ email }).select("+password");
 
     if (!existingUser) {
       return res.status(401).json({
@@ -72,10 +73,19 @@ exports.signin = async (req, res) => {
       });
     }
 
+    // Block unverified users
+    if (!existingUser.verified) {
+      return res.status(403).json({
+        success: false,
+        message: "Please verify your account before logging in",
+      });
+    }
+
     const isPasswordValid = await doHashValidation(
       password,
       existingUser.password
     );
+
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
@@ -100,21 +110,16 @@ exports.signin = async (req, res) => {
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
     });
+
+    // Remove password before sending user object
+    const userWithoutPassword = existingUser.toObject();
+    delete userWithoutPassword.password;
+
     res.status(200).json({
       success: true,
       message: "Signin successful",
       token,
-      user: {
-        // <-- Include the user object with relevant details
-        id: existingUser._id,
-        email: existingUser.email,
-        verified: existingUser.verified,
-        role: existingUser.role, // <--- Crucially, send the role here
-        // You can add other non-sensitive user properties if your frontend needs them immediately
-        // e.g., username: existingUser.username,
-      },
-      // Optional: You could also send a suggested redirect path directly
-      // redirectPath: existingUser.role === 'admin' ? '/admin/dashboard' : '/'
+      user: userWithoutPassword, // <-- send user with role
     });
   } catch (error) {
     console.error("Error during signin:", error);
@@ -125,6 +130,7 @@ exports.signin = async (req, res) => {
     });
   }
 };
+
 
 exports.signout = async (req, res) => {
   res.clearCookie("Authorization"); // Clear the cookie

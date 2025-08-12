@@ -21,6 +21,8 @@ app.use(cors());
 app.use(helmet()); // Basic security headers
 app.use(cookieParser()); // For parsing cookies
 app.use(express.urlencoded({ extended: true })); // For parsing application/x-www-form-urlencoded
+app.use("/uploads", express.static("uploads")); // Serve static files from the uploads directory
+
 
 // 3. MongoDB Connection
 mongoose.connect(process.env.MONGO_URI)

@@ -1,22 +1,35 @@
 const Product = require("../models/product.model");
-const { productSchemaValidation } = require('../middleware/validator');
-const mongoose = require('mongoose');
-
+const { productSchemaValidation } = require("../middleware/validator");
+const mongoose = require("mongoose");
 
 // ✅ Admin: Create New Product
 exports.createProduct = async (req, res) => {
   try {
-    // Validation with Joi (uncomment when validator is ready)
+    // 1. Process the uploaded file and assign its path to req.body.image
+    if (req.file) {
+      // Multer stores file information in req.file.path
+      // The image path needs to be a valid URI for Joi, so a path works
+      req.body.image = req.file.path; 
+    } else {
+      // Handle cases where no image is provided, if the image field is optional.
+      // If it's required, the Joi validation will handle the error.
+      delete req.body.image; 
+    }
+
+    // 2. Validate the request body *after* the image path has been set
     const { error } = productSchemaValidation.validate(req.body);
     if (error) {
+      // You can also delete the uploaded file here to clean up
+      if (req.file) {
+        fs.unlinkSync(req.file.path); 
+      }
       return res
         .status(400)
         .json({ success: false, message: error.details[0].message });
     }
 
-    // Add admin user ID to product
+    // 3. Add admin user ID and create the product
     req.body.user = req.user._id;
-
     const product = await Product.create(req.body);
 
     res.status(201).json({
@@ -41,7 +54,7 @@ exports.getAllProducts = async (req, res, next) => {
     if (search) {
       filter.$or = [
         { name: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } }
+        { description: { $regex: search, $options: "i" } },
       ];
     }
 
@@ -62,14 +75,15 @@ exports.getAllProducts = async (req, res, next) => {
     res.status(200).json({
       success: true,
       count: products.length,
-      products
+      products,
     });
   } catch (error) {
     console.error("Error fetching products:", error);
-    res.status(500).json({ success: false, message: "Failed to fetch products." });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch products." });
   }
 };
-
 
 exports.getProductDetails = async (req, res, next) => {
   try {
@@ -77,22 +91,28 @@ exports.getProductDetails = async (req, res, next) => {
 
     // Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ success: false, message: 'Invalid product ID.' });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid product ID." });
     }
 
     const product = await Product.findById(id);
 
     if (!product) {
-      return res.status(404).json({ success: false, message: "Product not found." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found." });
     }
 
     res.status(200).json({
       success: true,
-      product
+      product,
     });
   } catch (error) {
     console.error("Error fetching product details:", error);
-    res.status(500).json({ success: false, message: "Failed to fetch product details." });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch product details." });
   }
 };
 
@@ -164,7 +184,9 @@ exports.createOrUpdateReview = async (req, res) => {
 
     const product = await Product.findById(productId);
     if (!product) {
-      return res.status(404).json({ success: false, message: "Product not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found" });
     }
 
     const existingReviewIndex = product.reviews.findIndex(
@@ -181,7 +203,7 @@ exports.createOrUpdateReview = async (req, res) => {
         user: user.userId,
         name: user.email,
         rating: Number(rating),
-        comment
+        comment,
       };
       product.reviews.push(review);
     }
@@ -189,14 +211,19 @@ exports.createOrUpdateReview = async (req, res) => {
     // Recalculate ratings and number of reviews
     product.numOfReviews = product.reviews.length;
     product.ratings =
-      product.reviews.reduce((acc, rev) => acc + rev.rating, 0) / product.numOfReviews;
+      product.reviews.reduce((acc, rev) => acc + rev.rating, 0) /
+      product.numOfReviews;
 
     await product.save();
 
-    res.status(200).json({ success: true, message: "Review submitted successfully" });
+    res
+      .status(200)
+      .json({ success: true, message: "Review submitted successfully" });
   } catch (error) {
     console.error("Error in review:", error);
-    res.status(500).json({ success: false, message: "Error submitting review" });
+    res
+      .status(500)
+      .json({ success: false, message: "Error submitting review" });
   }
 };
 
@@ -207,7 +234,9 @@ exports.deleteReview = async (req, res) => {
 
     const product = await Product.findById(productId);
     if (!product) {
-      return res.status(404).json({ success: false, message: "Product not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found" });
     }
 
     product.reviews = product.reviews.filter(
@@ -217,14 +246,16 @@ exports.deleteReview = async (req, res) => {
     product.numOfReviews = product.reviews.length;
     product.ratings =
       product.numOfReviews > 0
-        ? product.reviews.reduce((acc, rev) => acc + rev.rating, 0) / product.numOfReviews
+        ? product.reviews.reduce((acc, rev) => acc + rev.rating, 0) /
+          product.numOfReviews
         : 0;
 
     await product.save();
-    res.status(200).json({ success: true, message: "Review deleted successfully" });
+    res
+      .status(200)
+      .json({ success: true, message: "Review deleted successfully" });
   } catch (error) {
     console.error("Error deleting review:", error);
     res.status(500).json({ success: false, message: "Error deleting review" });
   }
 };
-

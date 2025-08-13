@@ -3,7 +3,7 @@ const router = express.Router();
 const productController = require('../controllers/productController');
 const { identifier } = require('../middleware/identification'); // Your auth middleware
 const { authorizeRoles } = require('../middleware/authorization'); // Authorization middleware
-const upload = require("../middleware/upload");
+// const upload = require("../middleware/upload");
 const upload = require('../cloudinaryConfig');
 
 

@@ -5,21 +5,31 @@ const mongoose = require("mongoose");
 // ✅ Admin: Create New Product
 exports.createProduct = async (req, res) => {
   try {
+    // 1. Process the uploaded file and assign its path to req.body.image
     if (req.file) {
-      req.body.image = `/uploads/${req.file.filename}`;
+      // Multer stores file information in req.file.path
+      // The image path needs to be a valid URI for Joi, so a path works
+      req.body.image = req.file.path; 
+    } else {
+      // Handle cases where no image is provided, if the image field is optional.
+      // If it's required, the Joi validation will handle the error.
+      delete req.body.image; 
     }
 
-    // Validation with Joi
+    // 2. Validate the request body *after* the image path has been set
     const { error } = productSchemaValidation.validate(req.body);
     if (error) {
+      // You can also delete the uploaded file here to clean up
+      if (req.file) {
+        fs.unlinkSync(req.file.path); 
+      }
       return res
         .status(400)
         .json({ success: false, message: error.details[0].message });
     }
 
-    // Add admin user ID to product
+    // 3. Add admin user ID and create the product
     req.body.user = req.user._id;
-
     const product = await Product.create(req.body);
 
     res.status(201).json({

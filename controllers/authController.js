@@ -52,7 +52,7 @@ exports.signup = async (req, res) => {
   }
 };
 
-exports.signin = async (req, res) => {
+ exports.signin = async (req, res) => {
   const { email, password } = req.body;
   try {
     const { error } = signinSchema.validate({ email, password });
@@ -63,7 +63,8 @@ exports.signin = async (req, res) => {
         message: error.details[0].message,
       });
     }
-    const existingUser = await User.findOne({ email }).select("+password"); // Include password in the query
+
+    const existingUser = await User.findOne({ email }).select("+password");
 
     if (!existingUser) {
       return res.status(401).json({
@@ -72,10 +73,19 @@ exports.signin = async (req, res) => {
       });
     }
 
+    // Block unverified users
+    if (!existingUser.verified) {
+      return res.status(403).json({
+        success: false,
+        message: "Please verify your account before logging in",
+      });
+    }
+
     const isPasswordValid = await doHashValidation(
       password,
       existingUser.password
     );
+
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
@@ -101,10 +111,15 @@ exports.signin = async (req, res) => {
       sameSite: "strict",
     });
 
+    // Remove password before sending user object
+    const userWithoutPassword = existingUser.toObject();
+    delete userWithoutPassword.password;
+
     res.status(200).json({
       success: true,
       message: "Signin successful",
       token,
+      user: userWithoutPassword, // <-- send user with role
     });
   } catch (error) {
     console.error("Error during signin:", error);
@@ -115,6 +130,7 @@ exports.signin = async (req, res) => {
     });
   }
 };
+
 
 exports.signout = async (req, res) => {
   res.clearCookie("Authorization"); // Clear the cookie

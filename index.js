@@ -1,5 +1,5 @@
-// 1. Load environment variables FIRST
-require("dotenv").config();
+
+require('dotenv').config();
 
 const express = require("express");
 const helmet = require("helmet");

@@ -1,5 +1,4 @@
-
-require('dotenv').config();
+require("dotenv").config();
 
 const express = require("express");
 const helmet = require("helmet");
@@ -15,16 +14,29 @@ const app = express();
 
 // 2. Middleware setup
 app.use(express.json()); // For parsing application/json
-app.use(cors({
-  origin: "http://localhost:3000", // your Next.js frontend
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
-}));
+// ✅ Updated CORS configuration
+const allowedOrigins = [
+  "http://localhost:3000",
+  // "https://your-deployed-frontend-url.com", // <-- Paste your deployed frontend URL here
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 app.use(helmet()); // Basic security headers
 app.use(cookieParser()); // For parsing cookies
 app.use(express.urlencoded({ extended: true })); // For parsing application/x-www-form-urlencoded
 app.use("/uploads", express.static("uploads")); // Serve static files from the uploads directory
-
 
 // 3. MongoDB Connection
 mongoose

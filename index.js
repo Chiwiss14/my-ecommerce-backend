@@ -9,14 +9,17 @@ const mongoose = require("mongoose");
 const authRouter = require("./routers/authRouter"); // Assuming you have auth routes set up
 const productRoutes = require("./routers/productRouter"); // Import product routes
 const orderRoutes = require("./routers/orderRoutes");
-// const connectDatabase = require('./config/database'); // Ensure this path is correct
 const paymentRoute = require("./routers/paymentRoute");
 
 const app = express();
 
 // 2. Middleware setup
 app.use(express.json()); // For parsing application/json
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:3000", // your Next.js frontend
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 app.use(helmet()); // Basic security headers
 app.use(cookieParser()); // For parsing cookies
 app.use(express.urlencoded({ extended: true })); // For parsing application/x-www-form-urlencoded

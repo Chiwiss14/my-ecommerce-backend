@@ -13,18 +13,19 @@ const paymentRoute = require("./routers/paymentRoute");
 const app = express();
 
 // 2. Middleware setup
-app.use(express.json()); // For parsing application/json
-// ✅ Updated CORS configuration
 const allowedOrigins = [
   "http://localhost:3000",
-  "http://192.168.234.48:3000", // ✅ This the IP address here
-  "https://my-ecommerce-frontend.onrender.com"  
+  "http://192.168.234.48:3000",
+  "https://my-ecommerce-frontend.onrender.com"
 ];
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      if (process.env.NODE_ENV === "development") {
+        return callback(null, true); // allow all in dev
+      }
+      if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
@@ -34,6 +35,7 @@ app.use(
     credentials: true,
   })
 );
+
 app.use(helmet()); // Basic security headers
 app.use(cookieParser()); // For parsing cookies
 app.use(express.urlencoded({ extended: true })); // For parsing application/x-www-form-urlencoded

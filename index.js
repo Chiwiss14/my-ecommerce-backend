@@ -18,7 +18,7 @@ app.use(express.json()); // For parsing application/json
 const allowedOrigins = [
   "http://localhost:3000",
   "http://192.168.234.48:3000", // ✅ This the IP address here
-  "https://my-ecommerce-frontend.onrender.com/"  
+  "https://my-ecommerce-frontend.onrender.com"  
 ];
 
 app.use(

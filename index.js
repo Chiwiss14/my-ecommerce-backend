@@ -17,7 +17,7 @@ app.use(express.json()); // For parsing application/json
 // ✅ Updated CORS configuration
 const allowedOrigins = [
   "http://localhost:3000",
-  // "https://your-deployed-frontend-url.com", // <-- Paste your deployed frontend URL here
+  "http://192.168.234.48:3000", // ✅ This the IP address here
 ];
 
 app.use(

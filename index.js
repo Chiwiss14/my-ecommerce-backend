@@ -12,6 +12,9 @@ const paymentRoute = require("./routers/paymentRoute");
 
 const app = express();
 
+app.use(express.json());
+
+
 // 2. Middleware setup
 const allowedOrigins = [
   "http://localhost:3001",

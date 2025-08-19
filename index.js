@@ -15,6 +15,7 @@ const app = express();
 // 2. Middleware setup
 const allowedOrigins = [
   "http://localhost:3001",
+  "http://localhost:3000",
   "http://192.168.234.48:3000",
   "https://my-ecommerce-frontend.onrender.com"
 ];
